@@ -11,13 +11,20 @@ data:extend({
 		name = "krt-bio-processing-em",
 		setting_type = "startup",
 		default_value = true,
-		order = "a3",
+		order = "b1",
     },
     {
         type = "bool-setting",
 		name = "krt-spage-modules",
 		setting_type = "startup",
 		default_value = true,
-		order = "a4",
-    }
+		order = "c1",
+    },
+	{
+		type = "bool-setting",
+		name = "krt-holmium-to-lithium",
+		setting_type = "startup",
+		default_value = true,
+		order = "d1"
+	}
 })

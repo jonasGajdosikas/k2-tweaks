@@ -3,7 +3,7 @@
     "title": "Tweaks for k2",
     "description": "Modifies the lengths od underground belts, and makes the imersium pickaxe a trigger tech",
 
-    "version": "0.0.8",
+    "version": "0.1.0",
     "author": "jogaj",
     "factorio_version": "2.1",
 
@@ -21,6 +21,8 @@
         "Krastorio2",
         "Krastorio2-spaced-out",
 
-        "?ev-refining"
+        "?ev-refining",
+        "?lane-balancers",
+        "?god-module"
     ]
 }

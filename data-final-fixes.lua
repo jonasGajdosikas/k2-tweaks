@@ -17,6 +17,37 @@ if settings.startup["krt-belt-length-tweaks"].value then
     data.raw["underground-belt"]["kr-superior-underground-belt"].max_distance = 47
 end
 
+
+if mods["lane-balancers"] then
+    local function fix_recipe(config)
+        local splitter = data.raw["recipe"][config.prefix .. "splitter"]
+        local balancer = table.deepcopy(splitter)
+
+        balancer.name = config.prefix .. "lane-splitter"
+        balancer.main_product = config.prefix .. "lane-splitter"
+
+        if config.previous_prefix then
+            for _, ingredient in ipairs(balancer.ingredients) do
+                if ingredient.name == config.previous_prefix .. "splitter" then
+                    ingredient.name = config.previous_prefix .. "lane-splitter"
+                    ingredient.amount = 2
+                end
+            end
+        end
+
+        balancer.results[1].name = config.prefix .. "lane-splitter"
+        balancer.results[1].amount = 2
+
+        data.raw.recipe[config.prefix .. "lane-splitter"] = balancer
+    end
+
+    fix_recipe({prefix = "", previous_prefix = "n/a"})
+    fix_recipe({prefix = "fast-", previous_prefix = ""})
+    fix_recipe({prefix = "express-", previous_prefix = "fast-"})
+    fix_recipe({prefix = "turbo-", previous_prefix = "express-"})
+    fix_recipe({prefix = "kr-superior-", previous_prefix = "turbo-"})
+end
+
 -- tweak the advanced pickaxe tech to be a trigger instead of a research
 data.raw["technology"]["kr-advanced-pickaxe"].prerequisites = { "steel-axe", "kr-imersium-processing" }
 data.raw["technology"]["kr-advanced-pickaxe"].unit = nil
@@ -45,19 +76,11 @@ data.raw["inserter"]["kr-superior-long-inserter"].max_belt_stack_size = 4
 
 if settings.startup["krt-bio-processing-em"].value then add_recipe_category(data.raw["recipe"]["kr-bio-processing-circuit"], "electromagnetics") end
 
+
 add_recipe_category(data.raw.recipe["kr-ai-core"], "electromagnetics")
-
-
-local function change_ingredient(recipe_name, ingredient_name, new_ingredient)
-        local recipe = data.raw.recipe[recipe_name]
-        for i, ingredient in pairs(recipe.ingredients) do
-            if ingredient.name == ingredient_name then
-                ingredient = new_ingredient
-                return
-            end
-        end
-    end
-
+add_recipe_category(data.raw.recipe["kr-singularity-beacon"], "electromagnetics")
+data.raw.item["kr-singularity-beacon"].stack_size = 10
+data.raw.item["kr-singularity-beacon"].weight = 100 * kg
 
 -- data_util.add_or_replace_ingredient("recycler", "kr-rare-metals", { type = "item", name = "steel-plate", amount = 20 })
 data.raw.item["kr-quantum-computer"].default_import_location = "aquilo"
@@ -100,6 +123,11 @@ if mods ["ev-refining"] then
         }
     })
     table.insert(data.raw.technology["elite-ore-processing"].effects, {type = "unlock-recipe", recipe = "rare-metals-ore-alternative-enriching"})
+
+    data.raw.recipe["copper-dust-smelting"].allow_decomposition = false
+    data.raw.recipe["iron-dust-smelting"].allow_decomposition = false
+    data.raw.recipe["tungsten-dust-smelting"].allow_decomposition = false
+    data.raw.recipe["rare-metals-dust-smelting"].allow_decomposition = false
 end
 if mods["god-module"] then
     data_util.add_or_replace_ingredient("god-module-speed", "kr-ai-core", { type = "item", name = "kr-ai-core", amount = 5 })
@@ -108,4 +136,27 @@ if mods["god-module"] then
     data_util.add_or_replace_ingredient("god-module-quality", "kr-ai-core", { type = "item", name = "kr-ai-core", amount = 5 })
 end
 
+-- let me use hydrogen for fuel on aquilo goddangit
 table.insert(data.raw["reactor"]["heating-tower"]["energy_source"]["fuel_categories"],"kr-vehicle-fuel")
+
+if settings.startup["krt-holmium-to-lithium"] then
+    local lithium_recipe = data.raw.recipe["lithium"]
+	if (lithium_recipe) then
+		local existing_holmium = false
+        for _, ingredient in ipairs(lithium_recipe.ingredients) do
+            if ingredient.name == "holmium-plate" then
+                existing_holmium = true
+                break
+            end
+        end
+		if (not existing_holmium) then
+            local lithium_crystal = table.deepcopy(lithium_recipe)
+			lithium_crystal.name = "krt-lithium-crystallization"
+            lithium_crystal.localised_name = "Lithium crystallization on holmium"
+            lithium_crystal.main_product = "kr-lithium"
+            table.insert(lithium_crystal.ingredients, { type = "item", name = "holmium-plate", amount = 1, ignored_by_stats = 1})
+            table.insert(lithium_crystal.results, {type = "item", name = "holmium-plate", amount = 1, ignored_by_stats = 1, independent_probability = 0.8, affected_by_quality = false})
+            data:extend({lithium_crystal})
+		end
+	end
+end
