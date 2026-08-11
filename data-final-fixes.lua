@@ -72,6 +72,10 @@ data.raw["inserter"]["kr-superior-inserter"].max_belt_stack_size = 4
 data.raw["inserter"]["kr-superior-long-inserter"].max_belt_stack_size = 4
 
 
+
+data.raw["electric-energy-interface"]["kr-activated-intergalactic-transceiver"].surface_conditions = {}
+data.raw["accumulator"]["kr-intergalactic-transceiver"].surface_conditions = {}
+
 -- return of the bio processing unit
 
 if settings.startup["krt-bio-processing-em"].value then add_recipe_category(data.raw["recipe"]["kr-bio-processing-circuit"], "electromagnetics") end
@@ -134,6 +138,9 @@ if mods["god-module"] then
     data_util.add_or_replace_ingredient("god-module-efficiency", "kr-ai-core", { type = "item", name = "kr-ai-core", amount = 5 })
     data_util.add_or_replace_ingredient("god-module-productivity", "kr-ai-core", { type = "item", name = "kr-ai-core", amount = 5 })
     data_util.add_or_replace_ingredient("god-module-quality", "kr-ai-core", { type = "item", name = "kr-ai-core", amount = 5 })
+
+    data.raw["rocket-silo"]["rocket-silo"].allowed_effects = { "consumption", "speed", "productivity", "pollution" }
+    table.insert(data.raw["rocket-silo"]["rocket-silo"].allowed_module_categories, "god-modules")
 end
 
 -- let me use hydrogen for fuel on aquilo goddangit
@@ -157,6 +164,38 @@ if settings.startup["krt-holmium-to-lithium"] then
             table.insert(lithium_crystal.ingredients, { type = "item", name = "holmium-plate", amount = 1, ignored_by_stats = 1})
             table.insert(lithium_crystal.results, {type = "item", name = "holmium-plate", amount = 1, ignored_by_stats = 1, independent_probability = 0.8, affected_by_quality = false})
             data:extend({lithium_crystal})
+            table.insert(data.raw.technology["legendary-quality"].effects, {type = "unlock-recipe", recipe = "krt-lithium-crystallization"})
 		end
 	end
 end
+
+data.raw["assembling-machine"]["captive-biter-spawner"].allowed_effects = {"speed", "consumption"}
+
+
+local nuke_effects = {"nuke-effects-aquilo","nuke-effects-vulcanus", "nuke-effects-space"}
+local nuke_projectiles = {"kr-antimatter-rocket-projectile", "atomic-rocket", "kr-nuclear-turret-rocket-projectile", "kr-matter-turret-rocket-projectile"}
+local nuke_arty = {"kr-atomic-artillery-projectile", "kr-antimatter-artillery-projectile"}
+
+for _, projectile in ipairs(nuke_projectiles) do
+    -- target index 2, otherwise the lava tiles can remove cliffs first and you'd not get the achievement for cliff destruction.
+    for _, effect in ipairs(nuke_effects) do
+        table.insert(data.raw.projectile[projectile].action.action_delivery.target_effects, 2, {
+            type = "create-entity",
+            check_buildability = true,
+            entity_name = effect
+        })
+    end
+end
+
+for _, projectile in ipairs(nuke_arty) do
+    -- target index 2, otherwise the lava tiles can remove cliffs first and you'd not get the achievement for cliff destruction.
+    for _, effect in ipairs(nuke_effects) do
+        table.insert(data.raw["artillery-projectile"][projectile].action.action_delivery.target_effects, 2, {
+            type = "create-entity",
+            check_buildability = true,
+            entity_name = effect
+        })
+    end
+end
+
+
